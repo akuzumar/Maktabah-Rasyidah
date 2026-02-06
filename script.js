@@ -52,7 +52,13 @@ const DOM = {
     downloadPdfBtn: document.getElementById('downloadPdfBtn'),
     closePdfPreview: document.getElementById('closePdfPreview'),
     pdfFrame: document.getElementById('pdfFrame'),
-    pdfLoading: document.getElementById('pdfLoading')
+    pdfLoading: document.getElementById('pdfLoading'),
+    // Tambahkan ini (elemen yang ada di index.html)
+    adPopup: document.getElementById('adPopup'),
+    closeAdBtn: document.getElementById('closeAdBtn'),
+    whatsappPopup: document.getElementById('whatsappPopup'),
+    whatsappFloat: document.getElementById('whatsappFloat'),
+    closeWhatsapp: document.getElementById('closeWhatsapp')
 };
 
 // Popup Elements
@@ -207,34 +213,63 @@ class MaktabahApp {
     }
     
     loadNavbar() {
-        fetch('./navbar/navbar.html')
-            .then(response => response.text())
+        // Cek jika ada file navbar.html di folder navbar
+        const navbarPath = document.querySelector('[href*="navbar.html"]') ? './navbar/navbar.html' : 'navbar/navbar.html';
+        
+        fetch(navbarPath)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Navbar not found');
+                }
+                return response.text();
+            })
             .then(html => {
-                document.getElementById('navbar-container').innerHTML = html;
-                
-                // Jalankan script dari navbar
-                const scripts = document.getElementById('navbar-container').getElementsByTagName('script');
-                for (let script of scripts) {
-                    eval(script.textContent);
+                if (DOM.navbarContainer) {
+                    DOM.navbarContainer.innerHTML = html;
+                    
+                    // Jalankan script dari navbar
+                    const scripts = DOM.navbarContainer.getElementsByTagName('script');
+                    for (let script of scripts) {
+                        try {
+                            eval(script.textContent);
+                        } catch (e) {
+                            console.warn('Error executing navbar script:', e);
+                        }
+                    }
                 }
             })
             .catch(error => {
-                console.error('Error loading navbar:', error);
+                console.warn('Error loading navbar:', error);
                 // Fallback jika navbar gagal dimuat
-                document.getElementById('navbar-container').innerHTML = `
-                    <nav style="position:fixed; top:0; width:100%; background:#fff; padding:1rem; z-index:1000; border-bottom:1px solid #ddd;">
-                        <a href="index.html" style="font-weight:bold; color:#1a4d2e; text-decoration:none;">Maktabah Rasyida</a>
-                    </nav>`;
+                if (DOM.navbarContainer) {
+                    DOM.navbarContainer.innerHTML = `
+                        <nav style="position:fixed; top:0; width:100%; background:#fff; padding:1rem; z-index:1000; border-bottom:1px solid #ddd;">
+                            <a href="index.html" style="font-weight:bold; color:#1a4d2e; text-decoration:none;">Maktabah Rasyida</a>
+                        </nav>`;
+                }
             });
     }
     
     initEventListeners() {
         // Popup iklan
-        DOM.closeAdBtn.addEventListener('click', () => DOM.adPopup.style.display = 'none');
+        if (DOM.closeAdBtn && DOM.adPopup) {
+            DOM.closeAdBtn.addEventListener('click', () => {
+                DOM.adPopup.style.display = 'none';
+            });
+        }
         
         // WhatsApp
-        DOM.whatsappFloat.addEventListener('click', () => DOM.whatsappPopup.classList.toggle('active'));
-        DOM.closeWhatsapp.addEventListener('click', () => DOM.whatsappPopup.classList.remove('active'));
+        if (DOM.whatsappFloat && DOM.whatsappPopup) {
+            DOM.whatsappFloat.addEventListener('click', () => {
+                DOM.whatsappPopup.classList.toggle('active');
+            });
+        }
+        
+        if (DOM.closeWhatsapp && DOM.whatsappPopup) {
+            DOM.closeWhatsapp.addEventListener('click', () => {
+                DOM.whatsappPopup.classList.remove('active');
+            });
+        }
         
         // Setup close buttons untuk semua popup
         Object.entries(PopupManager.closeButtons).forEach(([category, closeBtn]) => {
@@ -258,7 +293,7 @@ class MaktabahApp {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 PopupManager.closeAllPopups();
-                if (DOM.previewModal.classList.contains('active')) {
+                if (DOM.previewModal && DOM.previewModal.classList.contains('active')) {
                     this.closePreviewModal();
                 }
             }
@@ -294,30 +329,38 @@ class MaktabahApp {
     
     initPreviewModal() {
         // Close button
-        DOM.closePdfPreview.addEventListener('click', () => {
-            this.closePreviewModal();
-        });
+        if (DOM.closePdfPreview) {
+            DOM.closePdfPreview.addEventListener('click', () => {
+                this.closePreviewModal();
+            });
+        }
         
         // Open in Drive button
-        DOM.openDriveBtn.addEventListener('click', () => {
-            if (appState.currentPreviewContent) {
-                window.open(appState.currentPreviewContent.pdfUrl, '_blank');
-            }
-        });
+        if (DOM.openDriveBtn) {
+            DOM.openDriveBtn.addEventListener('click', () => {
+                if (appState.currentPreviewContent) {
+                    window.open(appState.currentPreviewContent.pdfUrl, '_blank');
+                }
+            });
+        }
         
         // Download button
-        DOM.downloadPdfBtn.addEventListener('click', () => {
-            if (appState.currentPreviewContent) {
-                this.downloadContent(appState.currentPreviewContent.id);
-            }
-        });
+        if (DOM.downloadPdfBtn) {
+            DOM.downloadPdfBtn.addEventListener('click', () => {
+                if (appState.currentPreviewContent) {
+                    this.downloadContent(appState.currentPreviewContent.id);
+                }
+            });
+        }
         
         // Close modal when clicking outside
-        DOM.previewModal.addEventListener('click', (e) => {
-            if (e.target === DOM.previewModal) {
-                this.closePreviewModal();
-            }
-        });
+        if (DOM.previewModal) {
+            DOM.previewModal.addEventListener('click', (e) => {
+                if (e.target === DOM.previewModal) {
+                    this.closePreviewModal();
+                }
+            });
+        }
     }
     
     openPreviewModal(contentId) {
@@ -329,33 +372,37 @@ class MaktabahApp {
         appState.currentPreviewContent = content;
         
         // Update modal content
-        DOM.previewTitle.textContent = content.title;
-        DOM.previewAuthor.textContent = content.author;
-        DOM.previewCategory.textContent = content.category;
-        DOM.previewDownloads.textContent = `${content.downloadCount} kali diunduh`;
+        if (DOM.previewTitle) DOM.previewTitle.textContent = content.title;
+        if (DOM.previewAuthor) DOM.previewAuthor.textContent = content.author;
+        if (DOM.previewCategory) DOM.previewCategory.textContent = content.category;
+        if (DOM.previewDownloads) DOM.previewDownloads.textContent = `${content.downloadCount} kali diunduh`;
         
         // Set button URLs
-        DOM.openDriveBtn.setAttribute('data-url', content.pdfUrl);
+        if (DOM.openDriveBtn) DOM.openDriveBtn.setAttribute('data-url', content.pdfUrl);
         
         // Show loading
-        DOM.pdfLoading.style.display = 'flex';
+        if (DOM.pdfLoading) DOM.pdfLoading.style.display = 'flex';
         
         // Convert to preview URL and load
         const previewUrl = convertGoogleDriveUrl(content.pdfUrl);
-        DOM.pdfFrame.src = previewUrl;
+        if (DOM.pdfFrame) DOM.pdfFrame.src = previewUrl;
         
         // Show modal
-        DOM.previewModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
+        if (DOM.previewModal) {
+            DOM.previewModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
     }
     
     closePreviewModal() {
-        DOM.previewModal.classList.remove('active');
+        if (DOM.previewModal) {
+            DOM.previewModal.classList.remove('active');
+        }
         document.body.style.overflow = 'auto';
         
         // Reset iframe source
         setTimeout(() => {
-            DOM.pdfFrame.src = '';
+            if (DOM.pdfFrame) DOM.pdfFrame.src = '';
         }, 300);
     }
     
@@ -367,7 +414,7 @@ class MaktabahApp {
         const newCount = DownloadManager.incrementDownload(contentId);
         
         // Update display
-        DOM.previewDownloads.textContent = `${newCount} kali diunduh`;
+        if (DOM.previewDownloads) DOM.previewDownloads.textContent = `${newCount} kali diunduh`;
         
         // Show notification
         this.showNotification(`Mengunduh: ${content.title}`, 'success');
@@ -509,16 +556,20 @@ class MaktabahApp {
     }
 
     initLoadingScreen() {
-        setTimeout(() => { 
-            DOM.loadingScreen.style.opacity = '0'; 
-            DOM.loadingScreen.style.visibility = 'hidden'; 
-            if(!localStorage.getItem('adShown')) { 
-                setTimeout(() => { 
-                    DOM.adPopup.style.display = 'flex'; 
-                    localStorage.setItem('adShown', 'true'); 
-                }, 500); 
-            } 
-        }, 2000);
+        if (DOM.loadingScreen) {
+            setTimeout(() => { 
+                DOM.loadingScreen.style.opacity = '0'; 
+                DOM.loadingScreen.style.visibility = 'hidden'; 
+                if(!localStorage.getItem('adShown')) { 
+                    setTimeout(() => { 
+                        if (DOM.adPopup) {
+                            DOM.adPopup.style.display = 'flex'; 
+                        }
+                        localStorage.setItem('adShown', 'true'); 
+                    }, 500); 
+                } 
+            }, 2000);
+        }
     }
 
     initCarousel() {
