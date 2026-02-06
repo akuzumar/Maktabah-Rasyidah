@@ -62,7 +62,7 @@ class MaktabahApp {
     }
     
     loadNavbar() {
-        fetch('/navbar/navbar.html')
+        fetch('./navbar/navbar.html')
             .then(response => response.text())
             .then(html => {
                 document.getElementById('navbar-container').innerHTML = html;
