@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <!-- CSS File - DIPERBAIKI -->
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="cursor"></div>
@@ -47,22 +47,23 @@
     </div>
 
     <!--WA dibagian kanan bawah-->
-    <div class="whatsapp-popup" id="whatsappPopup">
-        <div class="whatsapp-options">
-            <div class="whatsapp-header">
-                <h3><i class="fab fa-whatsapp"></i> WhatsApp</h3>
-                <button class="close-whatsapp" id="closeWhatsapp" style="border:none; background:none; cursor:pointer;"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="whatsapp-list">
-                <a href="https://wa.me/6281219189448?text=Assalamualaikum" target="_blank" class="whatsapp-item">
-                    <i class="fas fa-question-circle" style="color:#25D366"></i><div><h4>Tanya Jawab</h4><p>Seputar koleksi kitab</p></div>
-                </a>
-                <a href="https://wa.me/6281219189448?text=Assalamualaikum" target="_blank" class="whatsapp-item">
-                    <i class="fas fa-handshake" style="color:#25D366"></i><div><h4>Kerja Sama</h4><p>Wakaf buku & kemitraan</p></div>
-                </a>
-            </div>
+    <!-- Cari bagian WhatsApp popup dan ubah menjadi: -->
+<div class="whatsapp-popup" id="whatsappPopup">
+    <div class="whatsapp-options">
+        <div class="whatsapp-header">
+            <button class="close-whatsapp" id="closeWhatsapp" style="border:none; background:none; cursor:pointer; position: absolute; top: 15px; right: 15px; font-size: 1.2rem; color: var(--text-secondary);"><i class="fas fa-times"></i></button>
+            <h3><i class="fab fa-whatsapp"></i> WhatsApp</h3>
+        </div>
+        <div class="whatsapp-list">
+            <a href="https://wa.me/6281219189448?text=Assalamualaikum" target="_blank" class="whatsapp-item">
+                <i class="fas fa-question-circle" style="color:#25D366"></i><div><h4>Tanya Jawab</h4><p>Seputar koleksi kitab</p></div>
+            </a>
+            <a href="https://wa.me/6281219189448?text=Assalamualaikum" target="_blank" class="whatsapp-item">
+                <i class="fas fa-handshake" style="color:#25D366"></i><div><h4>Kerja Sama</h4><p>Wakaf buku & kemitraan</p></div>
+            </a>
         </div>
     </div>
+</div>
 
     <div class="whatsapp-float" id="whatsappFloat"><i class="fab fa-whatsapp"></i></div>
 
@@ -641,6 +642,6 @@
     </script>
 
     <!-- JavaScript File - DIPERBAIKI -->
-    <script src="./script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
