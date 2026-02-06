@@ -1,16 +1,58 @@
+// ==============================================
+// KONFIGURASI UTAMA INDEX
+// ==============================================
+
+// Data Konten dari Konfigurasi HTML
+const contentConfigElement = document.getElementById('content-config');
+const contentConfig = contentConfigElement ? JSON.parse(contentConfigElement.textContent) : {
+    contents: {},
+    storageKey: 'maktabah_index_downloads'
+};
+
+// Fungsi untuk mengonversi URL Google Drive ke URL preview PDF
+function convertGoogleDriveUrl(url) {
+    if (url.includes('drive.google.com/file/d/')) {
+        const fileId = url.match(/\/d\/(.+?)\//)[1];
+        return `https://drive.google.com/file/d/${fileId}/preview`;
+    }
+    return url;
+}
+
+// Fungsi untuk mengonversi URL Google Drive ke URL download langsung
+function convertGoogleDriveToDirectDownload(url) {
+    if (url.includes('drive.google.com/file/d/')) {
+        const fileId = url.match(/\/d\/(.+?)\//)[1];
+        return `https://drive.google.com/uc?export=download&id=${fileId}`;
+    }
+    return url;
+}
+
+// State Management
+const appState = {
+    currentPreviewContent: null,
+    currentDownloads: {}
+};
+
 // DOM Elements
 const DOM = {
-    adPopup: document.getElementById('adPopup'), 
-    closeAdBtn: document.getElementById('closeAdBtn'),
-    whatsappFloat: document.getElementById('whatsappFloat'),
-    whatsappPopup: document.getElementById('whatsappPopup'), 
-    closeWhatsapp: document.getElementById('closeWhatsapp'),
+    navbarContainer: document.getElementById('navbar-container'),
     loadingScreen: document.getElementById('loadingScreen'),
     carouselPrev: document.getElementById('carouselPrev'),
-    carouselNext: document.getElementById('carouselNext'), 
+    carouselNext: document.getElementById('carouselNext'),
     trendingCarousel: document.getElementById('trendingCarousel'),
     categoryCards: document.querySelectorAll('.category-card'),
-    footerLinks: document.querySelectorAll('.footer-links a[data-category]')
+    footerLinks: document.querySelectorAll('.footer-links a[data-category]'),
+    // Preview Modal Elements
+    previewModal: document.getElementById('previewModal'),
+    previewTitle: document.getElementById('previewTitle'),
+    previewAuthor: document.getElementById('previewAuthor'),
+    previewCategory: document.getElementById('previewCategory'),
+    previewDownloads: document.getElementById('previewDownloads'),
+    openDriveBtn: document.getElementById('openDriveBtn'),
+    downloadPdfBtn: document.getElementById('downloadPdfBtn'),
+    closePdfPreview: document.getElementById('closePdfPreview'),
+    pdfFrame: document.getElementById('pdfFrame'),
+    pdfLoading: document.getElementById('pdfLoading')
 };
 
 // Popup Elements
@@ -38,7 +80,7 @@ const PopupManager = {
         const popup = PopupManager.popups[category];
         if (popup) {
             popup.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Mencegah scroll
+            document.body.style.overflow = 'hidden';
         }
     },
     
@@ -47,7 +89,7 @@ const PopupManager = {
         const popup = PopupManager.popups[category];
         if (popup) {
             popup.style.display = 'none';
-            document.body.style.overflow = 'auto'; // Mengembalikan scroll
+            document.body.style.overflow = 'auto';
         }
     },
     
@@ -71,11 +113,10 @@ const StatsManager = {
         const data = localStorage.getItem(StatsManager.getKey());
         if (data) return JSON.parse(data);
         
-        // Struktur awal jika belum ada data sama sekali
         return {
-            collections: {}, // Menyimpan jumlah file per kategori/halaman (objek)
-            visitors: 0,     // Total pengunjung
-            downloads: 0     // Total download
+            collections: {},
+            visitors: 0,
+            downloads: 0
         };
     },
 
@@ -85,13 +126,59 @@ const StatsManager = {
 
     // Rekam Kunjungan Baru
     incrementVisitor: () => {
-        // Mengecek sesi browser (sessionStorage) agar refresh halaman tidak menambah count
         if (!sessionStorage.getItem('visited_session')) {
             const data = StatsManager.getData();
             data.visitors += 1;
             StatsManager.saveData(data);
             sessionStorage.setItem('visited_session', 'true');
         }
+    }
+};
+
+// Download Manager untuk Index
+const DownloadManager = {
+    // Load download counts from localStorage
+    loadDownloads: () => {
+        const stored = localStorage.getItem(contentConfig.storageKey);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored);
+                Object.keys(contentConfig.contents).forEach(contentId => {
+                    if (parsed[contentId] !== undefined) {
+                        contentConfig.contents[contentId].downloadCount = parsed[contentId];
+                    }
+                });
+            } catch (e) {
+                console.error("Gagal memuat data unduhan:", e);
+            }
+        }
+    },
+    
+    // Save download counts to localStorage
+    saveDownloads: () => {
+        const dataToSave = {};
+        Object.keys(contentConfig.contents).forEach(contentId => {
+            if (contentConfig.contents[contentId].downloadCount > 0) {
+                dataToSave[contentId] = contentConfig.contents[contentId].downloadCount;
+            }
+        });
+        localStorage.setItem(contentConfig.storageKey, JSON.stringify(dataToSave));
+    },
+    
+    // Increment download count
+    incrementDownload: (contentId) => {
+        if (contentConfig.contents[contentId]) {
+            contentConfig.contents[contentId].downloadCount++;
+            DownloadManager.saveDownloads();
+            
+            // Update global stats
+            const stats = StatsManager.getData();
+            stats.downloads++;
+            StatsManager.saveData(stats);
+            
+            return contentConfig.contents[contentId].downloadCount;
+        }
+        return 0;
     }
 };
 
@@ -109,9 +196,14 @@ class MaktabahApp {
         this.initCustomCursor();
         this.initCategoryClick();
         this.initFooterNavigation();
+        this.initPreviewModal();
+        this.initReadButtons();
         
-        // UPDATE: Menggunakan Data Real dari StatsManager
-        StatsManager.incrementVisitor(); // Hitung pengunjung saat ini
+        // Load downloads data
+        DownloadManager.loadDownloads();
+        
+        // Update stats
+        StatsManager.incrementVisitor();
     }
     
     loadNavbar() {
@@ -166,8 +258,188 @@ class MaktabahApp {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 PopupManager.closeAllPopups();
+                if (DOM.previewModal.classList.contains('active')) {
+                    this.closePreviewModal();
+                }
             }
         });
+    }
+    
+    initReadButtons() {
+        // Event listener untuk tombol "Baca Disini" di semua bagian
+        const readButtons = document.querySelectorAll('.read-btn');
+        readButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                
+                // Cari card parent untuk mendapatkan contentId
+                const card = button.closest('.book-card, .recommendation-card');
+                if (card && card.dataset.contentId) {
+                    this.openPreviewModal(card.dataset.contentId);
+                }
+            });
+        });
+        
+        // Event listener untuk klik pada card itu sendiri
+        const contentCards = document.querySelectorAll('.book-card, .recommendation-card');
+        contentCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (!e.target.closest('.read-btn') && card.dataset.contentId) {
+                    this.openPreviewModal(card.dataset.contentId);
+                }
+            });
+        });
+    }
+    
+    initPreviewModal() {
+        // Close button
+        DOM.closePdfPreview.addEventListener('click', () => {
+            this.closePreviewModal();
+        });
+        
+        // Open in Drive button
+        DOM.openDriveBtn.addEventListener('click', () => {
+            if (appState.currentPreviewContent) {
+                window.open(appState.currentPreviewContent.pdfUrl, '_blank');
+            }
+        });
+        
+        // Download button
+        DOM.downloadPdfBtn.addEventListener('click', () => {
+            if (appState.currentPreviewContent) {
+                this.downloadContent(appState.currentPreviewContent.id);
+            }
+        });
+        
+        // Close modal when clicking outside
+        DOM.previewModal.addEventListener('click', (e) => {
+            if (e.target === DOM.previewModal) {
+                this.closePreviewModal();
+            }
+        });
+    }
+    
+    openPreviewModal(contentId) {
+        const content = contentConfig.contents[contentId];
+        if (!content) return;
+        
+        // Set current content
+        content.id = contentId;
+        appState.currentPreviewContent = content;
+        
+        // Update modal content
+        DOM.previewTitle.textContent = content.title;
+        DOM.previewAuthor.textContent = content.author;
+        DOM.previewCategory.textContent = content.category;
+        DOM.previewDownloads.textContent = `${content.downloadCount} kali diunduh`;
+        
+        // Set button URLs
+        DOM.openDriveBtn.setAttribute('data-url', content.pdfUrl);
+        
+        // Show loading
+        DOM.pdfLoading.style.display = 'flex';
+        
+        // Convert to preview URL and load
+        const previewUrl = convertGoogleDriveUrl(content.pdfUrl);
+        DOM.pdfFrame.src = previewUrl;
+        
+        // Show modal
+        DOM.previewModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    closePreviewModal() {
+        DOM.previewModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        
+        // Reset iframe source
+        setTimeout(() => {
+            DOM.pdfFrame.src = '';
+        }, 300);
+    }
+    
+    downloadContent(contentId) {
+        const content = contentConfig.contents[contentId];
+        if (!content) return;
+        
+        // Increment download count
+        const newCount = DownloadManager.incrementDownload(contentId);
+        
+        // Update display
+        DOM.previewDownloads.textContent = `${newCount} kali diunduh`;
+        
+        // Show notification
+        this.showNotification(`Mengunduh: ${content.title}`, 'success');
+        
+        // Trigger download
+        setTimeout(() => {
+            const directDownloadUrl = convertGoogleDriveToDirectDownload(content.pdfUrl);
+            const link = document.createElement('a');
+            link.href = directDownloadUrl;
+            link.download = `${content.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+            link.target = '_blank';
+            
+            if (link.download !== undefined) {
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                window.open(content.pdfUrl, '_blank');
+            }
+        }, 500);
+    }
+    
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: ${type === 'success' ? 'linear-gradient(135deg, var(--primary-color), var(--accent-color))' : 'rgba(197, 160, 89, 0.9)'};
+            color: ${type === 'success' ? 'var(--bg-paper)' : 'var(--text-primary)'};
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            animation: slideInRight 0.3s ease;
+            border: 1px solid rgba(197, 160, 89, 0.3);
+            max-width: 90%;
+            word-break: break-word;
+        `;
+
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+
+        document.body.appendChild(notification);
+
+        if (!document.querySelector('#notification-style')) {
+            const style = document.createElement('style');
+            style.id = 'notification-style';
+            style.textContent = `
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        setTimeout(() => {
+            notification.style.animation = 'slideInRight 0.3s ease reverse';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
     
     initCategoryClick() {
