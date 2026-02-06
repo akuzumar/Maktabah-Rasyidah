@@ -117,28 +117,128 @@ h1, h2, h3, h4, .logo-text, .hero-title { font-family: 'Cinzel', serif; letter-s
 .section-title i { font-size: 1.5rem; color: var(--accent-color); }
 .section-title h2 { font-size: 2.2rem; color: var(--primary-color); }
 
+/* TOMBOL "BACA DISINI" (STADIUM SHAPE) - POSISI DI POJOK KIRI BAWAH */
+.read-btn {
+    display: inline-block;
+    padding: 10px 25px;
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px; /* Stadium shape */
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    transition: var(--transition);
+    border: 2px solid var(--primary-color);
+    cursor: pointer;
+    width: fit-content;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.read-btn.left-align {
+    margin-top: 15px;
+    margin-left: 0;
+    margin-right: auto;
+    align-self: flex-start;
+}
+
+.read-btn:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(197, 160, 89, 0.3);
+    color: white;
+}
+
+.read-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: 0.5s;
+    z-index: -1;
+}
+
+.read-btn:hover::before {
+    left: 100%;
+}
+
 /* Categories */
 .categories-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; }
-.category-card { background: #fff; padding: 2rem 1rem; border-radius: 8px; text-align: center; border: 1px solid transparent; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: var(--transition); position: relative; overflow: hidden; cursor: pointer; }
-.category-card:hover { transform: translateY(-5px); border-color: rgba(197, 160, 89, 0.3); }
+.category-card { 
+    background: #fff; 
+    padding: 2rem 1rem; 
+    border-radius: 8px; 
+    text-align: center; 
+    border: 1px solid transparent; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+    transition: var(--transition); 
+    position: relative; 
+    overflow: hidden; 
+    cursor: pointer; 
+    height: 160px; /* Tambah tinggi sedikit */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.category-card:hover { 
+    transform: translateY(-5px); 
+    border-color: rgba(197, 160, 89, 0.3); 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+}
 .category-icon { font-size: 2rem; color: var(--primary-color); margin-bottom: 1rem; }
 
 /* Books & Carousel */
 .trending-container { position: relative; }
 .trending-carousel { display: flex; gap: 2rem; overflow-x: auto; padding: 2rem 1rem; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .trending-carousel::-webkit-scrollbar { display: none; }
-.book-card { flex: 0 0 280px; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.08); transition: var(--transition); position: relative; border: 1px solid #eee; cursor: pointer; }
+.book-card { 
+    flex: 0 0 280px; 
+    background: #fff; 
+    border-radius: 12px; 
+    overflow: hidden; 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08); 
+    transition: var(--transition); 
+    position: relative; 
+    border: 1px solid #eee; 
+    cursor: pointer; 
+    display: flex; 
+    flex-direction: column; 
+    height: 460px; /* Tinggi ditambah sedikit */
+}
 .book-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(44, 24, 16, 0.15); }
 .book-image { width: 100%; height: 220px; object-fit: cover; filter: sepia(30%) contrast(90%); transition: 0.5s; }
 .book-card:hover .book-image { filter: sepia(0%) contrast(100%); }
-.book-content { padding: 1.5rem; background: #fff; }
-.book-title { font-size: 1.2rem; color: var(--primary-color); margin-bottom: 0.5rem; font-family: 'Cinzel', serif; font-weight: 700; }
+.book-content { 
+    padding: 1.5rem; 
+    background: #fff; 
+    flex-grow: 1; 
+    display: flex; 
+    flex-direction: column; 
+    position: relative; 
+}
+.book-title { font-size: 1.2rem; color: var(--primary-color); margin-bottom: 0.5rem; font-family: 'Cinzel', serif; font-weight: 700; line-height: 1.3; }
 .book-author { color: var(--text-secondary); font-size: 0.9rem; font-style: italic; margin-bottom: 1rem; }
 .trending-badge { position: absolute; top: 10px; left: 10px; background: var(--accent-color); color: #fff; padding: 4px 10px; font-size: 0.7rem; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2; }
-.book-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; border-top: 1px solid #eee; padding-top: 0.8rem; }
-.book-category { font-size: 0.75rem; color: var(--accent-color); text-transform: uppercase; letter-spacing: 1px; }
-.action-btn { background: transparent; border: 1px solid var(--text-secondary); color: var(--text-secondary); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; transition: 0.3s; }
-.action-btn:hover { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+.book-category { 
+    font-size: 0.75rem; 
+    color: var(--accent-color); 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    margin-bottom: 15px; 
+}
+
+/* Tombol Baca Disini di Buku Trending - POSISI KIRI BAWAH */
+.book-content .read-btn.left-align {
+    margin-top: auto; /* Posisikan di bagian bawah kontainer flex */
+    margin-left: 0;
+    margin-right: auto;
+}
 
 .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 50%; background: #fff; border: 1px solid var(--accent-color); color: var(--primary-color); font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 10; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
 .carousel-btn:hover { background: var(--primary-color); color: #fff; }
@@ -147,12 +247,165 @@ h1, h2, h3, h4, .logo-text, .hero-title { font-family: 'Cinzel', serif; letter-s
 
 /* Recommendations */
 .recommendations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
-.recommendation-card { display: flex; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); transition: var(--transition); cursor: pointer; }
+.recommendation-card { 
+    display: flex; 
+    background: #fff; 
+    border-radius: 10px; 
+    overflow: hidden; 
+    border: 1px solid rgba(0,0,0,0.05); 
+    transition: var(--transition); 
+    cursor: pointer; 
+    flex-direction: column; 
+    height: 400px; /* Tinggi ditambah sedikit */
+}
 .recommendation-card:hover { transform: translateY(-5px); box-shadow: var(--soft-shadow); }
-.recommendation-image { width: 100px; object-fit: cover; filter: sepia(20%); }
-.recommendation-content { padding: 1rem; flex: 1; }
-.recommendation-content h3 { font-size: 1.1rem; color: var(--primary-color); margin-bottom: 0.5rem; }
-.recommendation-content p { font-size: 0.8rem; color: #666; line-height: 1.5; }
+.recommendation-image { width: 100%; height: 180px; object-fit: cover; filter: sepia(20%); }
+.recommendation-content { 
+    padding: 1.5rem; 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    position: relative; 
+}
+.recommendation-content h3 { 
+    font-size: 1.1rem; 
+    color: var(--primary-color); 
+    margin-bottom: 0.5rem; 
+    line-height: 1.3;
+}
+.recommendation-content p { 
+    font-size: 0.8rem; 
+    color: #666; 
+    line-height: 1.5; 
+    margin-bottom: 10px; 
+    flex-grow: 1;
+}
+
+/* Tombol Baca Disini di Rekomendasi - POSISI KIRI BAWAH */
+.recommendation-content .read-btn.left-align {
+    margin-top: auto; /* Posisikan di bagian bawah kontainer flex */
+    margin-left: 0;
+    margin-right: auto;
+}
+
+/* POPUP KATEGORI (UNTUK SEMUA: ARTIKEL, BUKU, CERITA, DLL) */
+.category-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 2000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.category-popup {
+    background: #fff;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 12px;
+    padding: 2rem;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    border: 3px double var(--accent-color);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.category-popup h3 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-family: 'Cinzel', serif;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.category-popup h3 i {
+    color: var(--accent-color);
+}
+
+.close-popup-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: 0.3s;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-popup-btn:hover {
+    background: var(--bg-paper-dark);
+    color: var(--primary-color);
+}
+
+.category-popup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.category-popup-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: var(--bg-paper);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: var(--transition);
+    border: 1px solid transparent;
+}
+
+.category-popup-item:hover {
+    background: #fff;
+    border-color: var(--accent-color);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(197, 160, 89, 0.1);
+}
+
+.category-popup-item i {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(197, 160, 89, 0.1);
+    border-radius: 50%;
+}
+
+.category-popup-item h4 {
+    font-size: 1rem;
+    color: var(--primary-color);
+    margin-bottom: 3px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+}
+
+.category-popup-item p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
 
 /* POPUPS & EXTRAS */
 .ad-popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 3000; display: none; justify-content: center; align-items: center; }
@@ -235,11 +488,19 @@ h1, h2, h3, h4, .logo-text, .hero-title { font-family: 'Cinzel', serif; letter-s
     text-decoration: none; 
     transition: 0.3s; 
     font-size: 0.9rem; 
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .footer-links a:hover { 
     color: var(--accent-color); 
     padding-left: 5px; 
+}
+
+.footer-links a i {
+    width: 20px;
+    text-align: center;
 }
 
 .footer-social {
@@ -292,7 +553,6 @@ h1, h2, h3, h4, .logo-text, .hero-title { font-family: 'Cinzel', serif; letter-s
     }
 }
 
-
 /* =========================================
    RESPONSIVE STYLE (MOBILE & TABLET)
    ========================================= */
@@ -314,18 +574,30 @@ h1, h2, h3, h4, .logo-text, .hero-title { font-family: 'Cinzel', serif; letter-s
 
     /* Carousel Buttons Mobile */
     .carousel-btn { display: none; } /* Sembunyikan tombol, gunakan swipe */
-    .book-card { flex: 0 0 240px; } /* Perkecil kartu buku */
+    .book-card { 
+        flex: 0 0 240px; 
+        height: 440px; /* Sesuaikan tinggi untuk mobile */
+    }
     
     /* Category Grid */
     .categories-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-
+    .category-card { height: 150px; }
+    
     /* Recommendation */
-    .recommendation-card { flex-direction: column; }
+    .recommendation-card { 
+        flex-direction: column; 
+        height: 380px; /* Sesuaikan tinggi untuk mobile */
+    }
     .recommendation-image { width: 100%; height: 150px; }
     
     /* WhatsApp & Popup */
     .whatsapp-popup { width: 90%; right: 5%; bottom: 100px; }
     .whatsapp-float { width: 50px; height: 50px; font-size: 1.5rem; }
+    
+    /* Category Popup */
+    .category-popup { width: 95%; padding: 1.5rem; }
+    .category-popup-grid { grid-template-columns: 1fr; }
+    .category-popup-item { padding: 12px; }
 }
 
 /* Small Phone Extra Adjustment */
@@ -333,4 +605,14 @@ h1, h2, h3, h4, .logo-text, .hero-title { font-family: 'Cinzel', serif; letter-s
     .hero-title { font-size: 2rem; }
     .categories-grid { grid-template-columns: 1fr; }
     .ad-popup { width: 95%; }
+    .category-popup { padding: 1.2rem; }
+    .category-popup-item h4 { font-size: 0.9rem; }
+    .category-popup-item p { font-size: 0.75rem; }
+    .book-card { 
+        flex: 0 0 220px; 
+        height: 420px; 
+    }
+    .recommendation-card { 
+        height: 360px; 
+    }
 }

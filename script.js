@@ -8,7 +8,58 @@ const DOM = {
     loadingScreen: document.getElementById('loadingScreen'),
     carouselPrev: document.getElementById('carouselPrev'),
     carouselNext: document.getElementById('carouselNext'), 
-    trendingCarousel: document.getElementById('trendingCarousel')
+    trendingCarousel: document.getElementById('trendingCarousel'),
+    categoryCards: document.querySelectorAll('.category-card'),
+    footerLinks: document.querySelectorAll('.footer-links a[data-category]')
+};
+
+// Popup Elements
+const PopupManager = {
+    popups: {
+        artikel: document.getElementById('articlePopup'),
+        buku: document.getElementById('bukuPopup'),
+        cerita: document.getElementById('ceritaPopup'),
+        jurnal: document.getElementById('jurnalPopup'),
+        berita: document.getElementById('beritaPopup'),
+        kamus: document.getElementById('kamusPopup')
+    },
+    
+    closeButtons: {
+        artikel: document.getElementById('closeArticlePopup'),
+        buku: document.getElementById('closeBukuPopup'),
+        cerita: document.getElementById('closeCeritaPopup'),
+        jurnal: document.getElementById('closeJurnalPopup'),
+        berita: document.getElementById('closeBeritaPopup'),
+        kamus: document.getElementById('closeKamusPopup')
+    },
+    
+    // Fungsi untuk membuka popup berdasarkan kategori
+    openPopup: (category) => {
+        const popup = PopupManager.popups[category];
+        if (popup) {
+            popup.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Mencegah scroll
+        }
+    },
+    
+    // Fungsi untuk menutup popup berdasarkan kategori
+    closePopup: (category) => {
+        const popup = PopupManager.popups[category];
+        if (popup) {
+            popup.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Mengembalikan scroll
+        }
+    },
+    
+    // Fungsi untuk menutup semua popup
+    closeAllPopups: () => {
+        Object.values(PopupManager.popups).forEach(popup => {
+            if (popup) {
+                popup.style.display = 'none';
+            }
+        });
+        document.body.style.overflow = 'auto';
+    }
 };
 
 // --- MANAJEMEN DATA REAL-TIME (LOCAL STORAGE) ---
@@ -56,6 +107,8 @@ class MaktabahApp {
         this.initLoadingScreen();
         this.initCarousel();
         this.initCustomCursor();
+        this.initCategoryClick();
+        this.initFooterNavigation();
         
         // UPDATE: Menggunakan Data Real dari StatsManager
         StatsManager.incrementVisitor(); // Hitung pengunjung saat ini
@@ -84,9 +137,89 @@ class MaktabahApp {
     }
     
     initEventListeners() {
+        // Popup iklan
         DOM.closeAdBtn.addEventListener('click', () => DOM.adPopup.style.display = 'none');
+        
+        // WhatsApp
         DOM.whatsappFloat.addEventListener('click', () => DOM.whatsappPopup.classList.toggle('active'));
         DOM.closeWhatsapp.addEventListener('click', () => DOM.whatsappPopup.classList.remove('active'));
+        
+        // Setup close buttons untuk semua popup
+        Object.entries(PopupManager.closeButtons).forEach(([category, closeBtn]) => {
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => PopupManager.closePopup(category));
+            }
+        });
+        
+        // Tutup popup saat klik di luar area popup
+        Object.values(PopupManager.popups).forEach(popup => {
+            if (popup) {
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) {
+                        PopupManager.closeAllPopups();
+                    }
+                });
+            }
+        });
+        
+        // Tutup popup dengan tombol ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                PopupManager.closeAllPopups();
+            }
+        });
+    }
+    
+    initCategoryClick() {
+        // Event listener untuk kategori populer
+        if (DOM.categoryCards) {
+            DOM.categoryCards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const category = card.getAttribute('data-category');
+                    
+                    // Buka popup sesuai kategori
+                    if (PopupManager.popups[category]) {
+                        e.preventDefault();
+                        PopupManager.openPopup(category);
+                    } else {
+                        // Untuk kategori yang tidak memiliki popup khusus
+                        switch(category) {
+                            case 'skripsi':
+                                window.location.href = '/jurnal/skripsi.html';
+                                break;
+                            case 'tesis':
+                                window.location.href = '/jurnal/tesis.html';
+                                break;
+                            case 'disertasi':
+                                window.location.href = '/jurnal/disertasi.html';
+                                break;
+                            case 'novel':
+                                window.location.href = '/navbar/buku/buku-fiksi/buku-fiksi.html';
+                                break;
+                            default:
+                                console.log('Kategori tidak dikenali:', category);
+                        }
+                    }
+                });
+            });
+        }
+    }
+    
+    initFooterNavigation() {
+        // Event listener untuk navigasi di footer
+        if (DOM.footerLinks) {
+            DOM.footerLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const category = link.getAttribute('data-category');
+                    
+                    // Buka popup sesuai kategori
+                    if (PopupManager.popups[category]) {
+                        PopupManager.openPopup(category);
+                    }
+                });
+            });
+        }
     }
 
     initCustomCursor() {
